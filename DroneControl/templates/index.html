@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- This page style -->
+    <!-- <link rel="stylesheet" type="text/css" href="_examples_data/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/flightindicators.css" /> -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='_examples_data/style.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flightindicators.css') }}" />
+
+    
+
+    <title>Flight Indicators jQuery Plugin Examples</title>
+
+    <style>
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: auto;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #000000;
+            padding: 2px;
+            text-align: center;
+        }
+
+        .example-group {
+            display: flex;
+            justify-content: space-between;
+            box-sizing: border-box;
+            margin: 2px 0;
+            width: 100%;
+        }
+
+        .example-group span {
+            flex: 0 0 48%;
+            text-align: center;
+        }
+
+        .example-group img {
+            width: 80px;
+            height: 80px;
+            display: block;
+            margin: auto;
+        }
+
+        .example-group:nth-child(odd) {
+            background-color: #f6f1f1;
+        }
+
+        /* Reduce margin for the first row in the first column */
+        .example-group:first-child:nth-child(even) {
+            margin-bottom: 1px;
+        }
+
+        /* Center the second column */
+        .example-group:nth-child(even) span {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .example-group input {
+            width: 30px; /* Adjust the width as needed */
+            height: 20px; /* Adjust the height as needed */
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <th>Remote drone</th>
+            <th>Other Connected drone</th>
+        </tr>
+        <tr>
+            <td>
+                <div class="example-group">
+                    <span>
+                        <span id="airspeed"></span>
+                        <input id="speedRemote" placeholder="Speed" value="{{ speed }}" readonly>
+                    </span>
+                    <span>
+                        <span id="altimeter"></span>
+                        <input id="altRemote" placeholder="Altitude" value="{{ alt }}" readonly>
+                    </span>
+                    
+                </div>
+                <div class="example-group">
+                    <span>
+                    <span id="heading"></span>
+                    <input id="dirRemote" placeholder="Direction" value="{{ dir }}" readonly>
+                    </span>
+                </div>
+            </td>
+            <td>
+                <div class="example-group">
+                    <span id="airspeed1"></span>
+                    <span id="altimeter1"></span>
+                </div>
+                <div class="example-group">
+                    <span id="heading1"></span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.flightindicators.js') }}"></script>
+    <!-- Add this within the <head> tag -->
+    <script>
+        console.log("SVG URL:", "{{ url_for('static', filename='img/fi_box.svg') }}");
+    </script>
+  
+    <script type="text/javascript">
+        // First static example
+        // Dynamic examples
+        var heading = $.flightIndicator('#heading', 'heading', { heading: 150, showBox: true, imagesPath: '{{ url_for("static", filename="img/airspeed-image.jpg") }}' });
+        // var heading = $.flightIndicator('#heading', 'heading', { heading: 150, showBox: true });
+        var airspeed = $.flightIndicator('#airspeed', 'airspeed', { showBox: true });
+        var altimeter = $.flightIndicator('#altimeter', 'altimeter');
+        var heading1 = $.flightIndicator('#heading1', 'heading', { heading: 150, showBox: true });
+        var airspeed1 = $.flightIndicator('#airspeed1', 'airspeed', { showBox: true });
+        var altimeter1 = $.flightIndicator('#altimeter1', 'altimeter');
+        // Update at 20Hz
+        var increment = 0;
+        setInterval(function ( ) {
+            // Airspeed update
+            airspeed.setAirSpeed(document.getElementById("speedRemote").value);
+            airspeed1.setAirSpeed(15);
+
+            // Altimeter update
+            altimeter.setAltitude(document.getElementById("altRemote").value);
+            altimeter1.setAltitude(50);
+            // altimeter.setPressure(1000+3);
+
+            // Heading update
+            heading.setHeading(document.getElementById("dirRemote").value);
+            heading1.setHeading(90);
+        }, 50);
+    </script>
+</body>
+
+</html>

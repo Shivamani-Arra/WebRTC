@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Indicators</title>
+    <style>
+        #altimeter, #speedometer {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        #altimeter::before, #speedometer::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="altimeter" style="background-image: url('altimeter_image.jpg');">
+        <div id="altimeterValue">0</div>
+    </div>
+
+    <div id="speedometer" style="background-image: url('speedometer_image.jpg');">
+        <div id="speedometerValue">0</div>
+    </div>
+
+    <script>
+        // Function to update the altimeter value and image
+        function updateAltimeter(value) {
+            document.getElementById('altimeterValue').innerText = value;
+            // You may need to adjust the logic for updating the altimeter image based on the value
+            // Example: document.getElementById('altimeter').style.backgroundImage = `url('altimeter_${value}.jpg')`;
+        }
+
+        // Function to update the speedometer value and image
+        function updateSpeedometer(value) {
+            document.getElementById('speedometerValue').innerText = value;
+            // You may need to adjust the logic for updating the speedometer image based on the value
+            // Example: document.getElementById('speedometer').style.backgroundImage = `url('speedometer_${value}.jpg')`;
+        }
+
+        // Simulate dynamic updates (you can replace this with real-time data)
+        setInterval(() => {
+            const altimeterValue = Math.floor(Math.random() * 10000); // Example random altitude value
+            const speedometerValue = Math.floor(Math.random() * 500); // Example random speed value
+
+            updateAltimeter(altimeterValue);
+            updateSpeedometer(speedometerValue);
+        }, 2000); // Update every 2 seconds
+    </script>
+</body>
+</html>
