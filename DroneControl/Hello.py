@@ -93,7 +93,10 @@ def connect_vehicle():
 
       vehicle.wait_ready('autopilot_version')
       print(vehicle.location.global_relative_frame)
-      return render_template('takeoff.html',lat=vehicle.location.global_relative_frame.lat,long=vehicle.location.global_relative_frame.lon)
+      if(int(vehicle.location.global_relative_frame.alt)==0):
+         return render_template('takeoff.html',lat=vehicle.location.global_relative_frame.lat,long=vehicle.location.global_relative_frame.lon)
+      else:
+         return render_template('Goto.html',lat=vehicle.location.global_relative_frame.lat,long=vehicle.location.global_relative_frame.lon)
 def connect1(s):
    vehicle = connect(s, wait_ready=True)
    print("\nConnecting to vehicle on: %s" % s)
@@ -143,11 +146,11 @@ def arm_and_takeoff():
          # render_template("index.html",alt=vehicle.location.global_relative_frame.alt,dir=vehicle.heading,speed=vehicle.airspeed,connectionSpeed=x)
          return render_template("index.html",alt=vehicle.location.global_relative_frame.alt,dir=vehicle.heading,speed=vehicle.airspeed,connectionSpeed=x)
    else:
-      long=request.form['long']
-      lat=request.form['lat']
-      alt=request.form['alt']
+      long=float(request.form['long'])
+      lat=float(request.form['lat'])
+      alt=float(request.form['alt'])
       point1 = LocationGlobalRelative(lat,long,alt)
-      point1.yaw=0 
+      point1.yaw=0.0
       if(vehicle.mode!="GUIDED"):
          vehicle.mode = VehicleMode("GUIDED")
       vehicle.armed = True
@@ -158,9 +161,9 @@ def arm_and_takeoff():
       print("goto!")
       vehicle.simple_goto(point1)
       while True:
-         print(" Altitude: ", vehicle.location.global_relative_frame.alt)
+         print(" Altitude: ", vehicle.location.global_relative_frame.alt,int(vehicle.location.global_relative_frame.lat*1000) ,int(lat*1000), int(vehicle.location.global_relative_frame.lon*1000) ,int(1000*long))
       # Break and return from function just below target altitude.
-         if int(vehicle.location.global_relative_frame.lat*10000) ==int(lat*10000) and int(vehicle.location.global_relative_frame.lon*10000) ==int(10000*long):
+         if int(vehicle.location.global_relative_frame.lat*1000) ==int(lat*1000) and int(vehicle.location.global_relative_frame.lon*1000) ==int(1000*long):
             print("Reached location",vehicle.location.global_relative_frame)
             break
          time.sleep(20)
@@ -178,13 +181,13 @@ def return_to_home():
       # Handle any exceptions that might occur during the process
       return render_template("index.html", error=f"Error: {str(e)}")
 @app.route('/Land')
-def return_to_home():
+def land():
    global vehicle
    try:
       vehicle.mode = VehicleMode("LAND")
       while not vehicle.mode.name == 'LAND':
          pass
-      return render_template("Goto.html", message="Returning to Home (RTL)...")
+      return render_template("takeoff.html", message="Returning to Home (RTL)...")
    except Exception as e:
       # Handle any exceptions that might occur during the process
       return render_template("index.html", error=f"Error: {str(e)}")
