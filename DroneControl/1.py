@@ -9,13 +9,12 @@ from dronekit_sitl import SITL
 # sitl.download('copter', '3.6', verbose=True) 
 # sitl_args = ['--home=lat,lon']
 # sitl.launch(sitl_args)
-
 s=input()
 # print("\nConnecting to vehicle on: %s" % connection_string)
 # vehicle = connect(connection_string, wait_ready=True)
 vehicle = connect(s, wait_ready=True,timeout=60)
-long=149.1659260
-lat=-35.3591837
+long=78.489019
+lat=17.396509
 point1 = LocationGlobalRelative(lat,long,20)
 # vehicle.home_location(point1)
 try:
@@ -53,19 +52,17 @@ while True:
     time.sleep(1)
 # long=78.4875251
 # lat=17.3988
-
 point1.yaw=350
 print("goto!")
 vehicle.simple_goto(point1) 
-
 while True:
     print(" Altitude: ", vehicle.location.global_relative_frame.alt)
     # Break and return from function just below target altitude.
-    # if vehicle.location.global_relative_frame.lat ==lat and vehicle.location.global_relative_frame.lon ==long:
-    #     print("Reached location",vehicle.location.global_relative_frame)
-    #     break
-    time.sleep(150)
-    break
+    print("Reached location",vehicle.location.global_relative_frame,lat*10000,long*10000)
+    if int(vehicle.location.global_relative_frame.lat*10000) ==int(lat*10000) and int(vehicle.location.global_relative_frame.lon*10000) ==int(10000*long):
+        print("Reached location",vehicle.location.global_relative_frame)
+        break
+    time.sleep(1)
 vehicle.mode = VehicleMode("RTL")
 vehicle.RTL_ALT=2000
 # : The minimum altitude the copter will move to before returning to launch.
