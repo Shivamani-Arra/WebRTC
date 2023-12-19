@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.23/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.23/"></script>
+    <title>Drone Control Center</title>
+    <style>
+      #viewDiv {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #ddd;
+      }
+      .image-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 330px;
+      }
+
+      img {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      img:hover {
+        transform: scale(1.1);
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: grey;
+      }
+
+      header {
+        background-color: #333;
+        padding: 2px;
+        text-align: center;
+        background-color: #192939;
+      }
+
+      header h1 {
+        color: grey;
+      }
+
+      header a {
+        text-decoration: none;
+      }
+
+      nav {
+        background-color: #060613;
+        padding: 10px;
+        text-align: center;
+        display: flex;
+        justify-content: space-around;
+        text-decoration: none;
+        margin-bottom: 10px;
+      }
+
+      nav a {
+        color: #ecf0f1;
+        text-decoration: none;
+        padding: 5px 5px;
+        margin: 0 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      nav a:hover {
+        text-decoration: none;
+        background-color: #2c3e50;
+      }
+
+      figure {
+        text-align: center;
+      }
+
+      main {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        align-items: center;
+      }
+
+      section {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      h1,
+      h2 {
+        color: grey;
+      }
+
+      footer {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        text-align: center;
+        padding: 10px;
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+      }
+
+      label {
+        font-size: 18px;
+      }
+
+      section button {
+        padding: 10px 20px;
+        font-size: 16px;
+        width: 20%;
+        color: #fff;
+        background-color: #3498db;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        margin-bottom: 10px;
+        align-items: center;
+      }
+
+      section button:hover {
+        background-color: #e67e22;
+      }
+
+      section label,
+      section input {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>Take Off Page</h2>
+    </header>
+
+    <nav>
+      <a href="/main">Main</a>
+      <a href="https://172.168.0.46:3000/" target="_blank">Video</a>
+      <a href="/">Disconnect</a>
+    </nav>
+
+    <section>
+      <form action="http://127.0.0.1:5000/main" method="post" >
+        <label for="alt">Enter Altitude :</label>
+        <br />
+        <br />
+        <input
+          type="number"
+          id="altitude"
+          name="alt"
+          placeholder="Enter Altitude"
+          required
+        />
+        <br />
+        <button type="submit">Take Off</button>
+      </form>
+      <div id="viewDiv"></div>
+      <script>
+        require([
+          "esri/Map",
+          "esri/views/MapView",
+          "esri/Graphic",
+          "esri/layers/GraphicsLayer",
+          "esri/widgets/CoordinateConversion",
+        ], function (
+          Map,
+          MapView,
+          Graphic,
+          GraphicsLayer,
+          CoordinateConversion
+        ) {
+          var map = new Map({
+            basemap: "streets",
+          });
+
+          var view = new MapView({
+            container: "viewDiv",
+            map: map,
+            zoom: 7,
+            center: [0, 0],
+          });
+
+          var graphicsLayer = new GraphicsLayer();
+          map.add(graphicsLayer);
+
+          var fixedLatitude = "{{lat}}"; // Replace with your desired latitude
+          var fixedLongitude = "{{long}}"; // Replace with your desired longitude
+          console.log("hii",fixedLatitude,fixedLongitude)
+          var fixedLocation = {
+            type: "point",
+            longitude: fixedLongitude,
+            latitude: fixedLatitude,
+          };
+
+          var markerSymbol = {
+            type: "simple-marker",
+            color: [226, 119, 40],
+            outline: {
+              color: [255, 255, 255],
+              width: 2,
+            },
+          };
+
+          var pointGraphic = new Graphic({
+            geometry: fixedLocation,
+            symbol: markerSymbol,
+          });
+
+          graphicsLayer.add(pointGraphic);
+
+          view.center = [fixedLongitude, fixedLatitude];
+          view.zoom = 17;
+
+          view.ui.add(coordinateConversion, "top-right");
+
+          document.getElementById("coordinates").textContent =
+            "Fixed Latitude : " +
+            fixedLatitude +
+            " Fixed Longitude : " +
+            fixedLongitude;
+          // Rest of the code...
+        });
+      </script>
+    </section>
+
+    <footer>&copy; 2023 Drone Control Systems</footer>
+  </body>
+</html>

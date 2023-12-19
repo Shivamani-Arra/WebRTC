@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.23/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.23/"></script>
+    <style>
+      #viewDiv {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #ddd;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        background-color: grey;
+      }
+
+      header {
+        background-color: #333;
+        padding: 4px;
+        text-align: center;
+        background-color: #192939;
+      }
+
+      h2 {
+        color: grey;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-around;
+        background-color: #060613;
+        padding: 10px;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      #container {
+        display: flex;
+      }
+
+      #left-section,
+      #right-section {
+        flex: 1;
+        padding: 20px;
+        box-sizing: border-box;
+        justify-content: center;
+        text-align: center;
+      }
+
+      #map {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #ddd;
+      }
+
+      #input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      label {
+        background-color: #ddd;
+      }
+
+      #input-container input {
+        width: 20%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      #sectionbutton {
+        text-align: center;
+      }
+
+      #sectionbutton button {
+        padding: 10px 20px;
+        font-size: 16px;
+        width: 15%;
+        color: #fff;
+        background-color: #3498db;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        margin-bottom: 10px;
+      }
+
+      #sectionbutton button:hover {
+        background-color: orange;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h2>MAP TRACKING AND ALTITUDE CHECK</h2>
+    </header>
+    <nav>
+      <a href="/main1">Main</a>
+      <a href="https://172.168.0.46:3000/" target="_blank">Video</a>
+      <a href="/">Disconnect</a>
+    </nav>
+
+    <div id="container">
+      <section id="right-section">
+        <div id="viewDiv"></div>
+        <script>
+          require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/Graphic",
+            "esri/layers/GraphicsLayer",
+            "esri/widgets/CoordinateConversion",
+          ], function (
+            Map,
+            MapView,
+            Graphic,
+            GraphicsLayer,
+            CoordinateConversion
+          ) {
+            var map = new Map({
+              basemap: "streets",
+            });
+
+            var view = new MapView({
+              container: "viewDiv",
+              map: map,
+              zoom: 7,
+              center: [0, 0],
+            });
+
+            var graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer);
+
+            navigator.geolocation.getCurrentPosition(function (position) {
+              var currentLocation = {
+                type: "point",
+                longitude:"{{long}}",
+                latitude: "{{lat}}",
+              };
+
+              view.center = [
+                position.coords.longitude,
+                position.coords.latitude,
+              ];
+              view.zoom = 17;
+
+              var markerSymbol = {
+                type: "simple-marker",
+                color: [226, 119, 40],
+                outline: {
+                  color: [255, 255, 255],
+                  width: 2,
+                },
+              };
+
+              var pointGraphic = new Graphic({
+                geometry: currentLocation,
+                symbol: markerSymbol,
+              });
+
+              graphicsLayer.add(pointGraphic);
+
+              view.ui.add(coordinateConversion, "top-right");
+
+              document.getElementById("coordinates").textContent =
+                "Current Latitude : " +
+                position.coords.latitude.toFixed(4) +
+                " Current Longitude : " +
+                position.coords.longitude.toFixed(4);
+            });
+
+            var locationFixed = false;
+
+            view.on("click", function (event) {
+              if (!locationFixed) {
+                var mapPoint = {
+                  type: "point",
+                  longitude: event.mapPoint.longitude,
+                  latitude: event.mapPoint.latitude,
+                };
+
+                graphicsLayer.removeAll();
+                var markerSymbol = {
+                  type: "simple-marker",
+                  color: [226, 119, 40],
+                  outline: {
+                    color: [255, 255, 255],
+                    width: 2,
+                  },
+                };
+
+                var pointGraphic = new Graphic({
+                  geometry: mapPoint,
+                  symbol: markerSymbol,
+                });
+
+                graphicsLayer.add(pointGraphic);
+
+                document.getElementById("lat").value =
+                  event.mapPoint.latitude.toFixed(4);
+                document.getElementById("long").value =
+                  event.mapPoint.longitude.toFixed(4);
+
+                locationFixed = true;
+              }
+            });
+          });
+        </script>
+      </section>
+    </div>
+    <form action="/main" method="post">
+    <section id="input-container">
+      <input id="lat" name="lat" value="{{lat}}" required />
+      <input id="long" name="long" value="{{long}}" required />
+      <input
+        type="number"
+        id="altitude"
+        name="alt"
+        placeholder="Enter Altitude"
+        required
+      />
+      
+    </section>
+    <section id="sectionbutton"><button type="submit">GoTo</button></section>
+  </form>
+  <form method="GET" action="/change_yaw">
+    <section id="input-container">
+      <input id="yaw" name="heading" placeholder="enter angle" required />
+    </section>
+    <section id="sectionbutton"><button type="submit">Yaw</button></section>
+  </form>
+    <section id="sectionbutton">
+      
+      <a  href="/Land"><button type="button">Land</button></a>
+      <a  href="/return_to_home"><button type="button">Return To Ground</button></a>
+    </section>
+  </body>
+</html>
